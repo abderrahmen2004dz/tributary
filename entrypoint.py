@@ -1,8 +1,9 @@
 # import dependencies
 import json
-import redis as redis
+import redis
 from flask import Flask, request
 from loguru import logger
+from statistics import mean
 
 HISTORY_LENGTH = 10
 DATA_KEY = "engine_temperature"
@@ -29,8 +30,19 @@ def record_engine_temperature():
     engine_temperature_values = database.lrange(DATA_KEY, 0, -1)
     logger.info(f"engine temperature list now contains these values: {engine_temperature_values}")
 
+    # Calculate current engine temperature
+    current_engine_temperature = engine_temperature_values[0]
+
+    # Calculate average engine temperature
+    engine_temperature_values_float = [float(temp) for temp in engine_temperature_values]
+    average_engine_temperature = mean(engine_temperature_values_float)
+
     logger.info(f"record request successful")
-    return {"success": True}, 200
+    return {
+        "success": True,
+        "current_engine_temperature": current_engine_temperature,
+        "average_engine_temperature": average_engine_temperature
+    }, 200
 
 
 # we'll implement this in the next step!
